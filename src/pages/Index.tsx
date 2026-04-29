@@ -1,301 +1,177 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Icon from "@/components/ui/icon";
 
-const HERO_IMAGE = "https://cdn.poehali.dev/projects/224cca5f-68dc-41aa-8e6c-2eb58749f3cd/files/f4cef7d7-d845-434a-993f-cd60b0e1ee7e.jpg";
+const IMG_HERO    = "https://cdn.poehali.dev/projects/224cca5f-68dc-41aa-8e6c-2eb58749f3cd/files/3e7b789f-53c6-40fd-83d7-19a7f0800735.jpg";
+const IMG_DRONE   = "https://cdn.poehali.dev/projects/224cca5f-68dc-41aa-8e6c-2eb58749f3cd/files/4e6d267c-acb9-4664-8d44-182be1acec50.jpg";
+const IMG_FIELD   = "https://cdn.poehali.dev/projects/224cca5f-68dc-41aa-8e6c-2eb58749f3cd/files/02b6b970-8973-4dbb-888d-0ae9a9ae92aa.jpg";
+const IMG_FARMER  = "https://cdn.poehali.dev/projects/224cca5f-68dc-41aa-8e6c-2eb58749f3cd/files/ca887af8-3602-422f-a408-836bead58df9.jpg";
 
 function useReveal() {
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) e.target.classList.add("visible");
-        });
-      },
+    const obs = new IntersectionObserver(
+      (entries) => entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add("visible"); }),
       { threshold: 0.1 }
     );
-    document.querySelectorAll(".section-reveal").forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
+    document.querySelectorAll(".section-reveal").forEach((el) => obs.observe(el));
+    return () => obs.disconnect();
   }, []);
 }
 
-function useCounter(target: number, duration = 2000, start = false) {
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    if (!start) return;
-    let startTime: number | null = null;
-    const step = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      setCount(Math.floor(progress * target));
-      if (progress < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  }, [start, target, duration]);
-  return count;
-}
-
+/* ───── NAV ───── */
 const NavBar = () => {
   const [scrolled, setScrolled] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-
+  const [open, setOpen] = useState(false);
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+    const fn = () => setScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", fn);
+    return () => window.removeEventListener("scroll", fn);
   }, []);
 
   const links = [
-    { href: "#advantages", label: "Преимущества" },
-    { href: "#drones", label: "Дроны" },
-    { href: "#capabilities", label: "Возможности" },
-    { href: "#works", label: "Работы" },
-    { href: "#about", label: "О компании" },
-    { href: "#order", label: "Заявка" },
+    ["#advantages","Преимущества"],
+    ["#drones","Техника"],
+    ["#capabilities","Возможности"],
+    ["#works","Примеры работ"],
+    ["#crops","Культуры"],
+    ["#about","О компании"],
+    ["#order","Заявка"],
   ];
 
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? "bg-agro-dark/95 backdrop-blur-md border-b border-agro-border" : "bg-transparent"
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        <a href="#" className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-neon-green rounded-sm flex items-center justify-center animate-pulse-green">
-            <Icon name="Plane" size={16} className="text-agro-dark rotate-45" />
+    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-white shadow-md" : "bg-white/95"}`}>
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+        {/* Logo */}
+        <a href="#" className="flex items-center gap-2 shrink-0">
+          <div className="w-7 h-7 bg-green-500 rounded flex items-center justify-center">
+            <Icon name="Plane" size={14} className="text-white rotate-45" />
           </div>
-          <span className="font-bebas text-2xl text-white tracking-widest">АгроДрон</span>
+          <span className="font-golos font-bold text-green-700 text-lg leading-none">АгроДрон</span>
         </a>
 
-        <div className="hidden lg:flex items-center gap-8">
-          {links.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              className="text-sm text-gray-400 hover:text-neon-green transition-colors duration-200 font-golos tracking-wide"
-            >
-              {l.label}
-            </a>
-          ))}
+        {/* Contacts */}
+        <div className="hidden lg:flex items-center gap-5 text-sm text-gray-600">
+          <span className="flex items-center gap-1"><Icon name="Phone" size={13} className="text-green-500" />+7 (800) 555-00-00</span>
+          <span className="flex items-center gap-1"><Icon name="Mail" size={13} className="text-green-500" />zakaz@agrodron.ru</span>
         </div>
 
-        <a
-          href="#order"
-          className="hidden lg:block bg-neon-green text-agro-dark font-golos font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-neon-lime transition-all duration-200 hover:scale-105"
-        >
-          Рассчитать стоимость
+        {/* Nav links */}
+        <nav className="hidden xl:flex items-center gap-5 text-sm">
+          {links.slice(0,5).map(([h,l]) => (
+            <a key={h} href={h} className="text-gray-700 hover:text-green-600 transition-colors font-golos">{l}</a>
+          ))}
+        </nav>
+
+        {/* CTA */}
+        <a href="#order" className="hidden lg:inline-flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white text-sm font-semibold font-golos px-4 py-2 rounded-md transition-colors shrink-0">
+          <Icon name="Calculator" size={14} />Рассчитать стоимость
         </a>
 
-        <button className="lg:hidden text-gray-300" onClick={() => setMenuOpen(!menuOpen)}>
-          <Icon name={menuOpen ? "X" : "Menu"} size={24} />
+        <button className="lg:hidden text-gray-700" onClick={() => setOpen(!open)}>
+          <Icon name={open ? "X" : "Menu"} size={22} />
         </button>
       </div>
-
-      {menuOpen && (
-        <div className="lg:hidden bg-agro-dark border-b border-agro-border px-6 py-4 flex flex-col gap-4">
-          {links.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              className="text-gray-300 hover:text-neon-green transition-colors"
-              onClick={() => setMenuOpen(false)}
-            >
-              {l.label}
-            </a>
+      {open && (
+        <div className="lg:hidden bg-white border-t px-4 py-3 flex flex-col gap-3">
+          {links.map(([h,l]) => (
+            <a key={h} href={h} className="text-gray-700 text-sm font-golos hover:text-green-600" onClick={() => setOpen(false)}>{l}</a>
           ))}
-          <a
-            href="#order"
-            className="bg-neon-green text-agro-dark font-semibold text-sm px-5 py-2.5 rounded-lg text-center"
-            onClick={() => setMenuOpen(false)}
-          >
-            Рассчитать стоимость
-          </a>
+          <a href="#order" className="bg-green-500 text-white text-sm font-semibold font-golos px-4 py-2 rounded-md text-center" onClick={() => setOpen(false)}>Рассчитать стоимость</a>
         </div>
       )}
-    </nav>
+    </header>
   );
 };
 
+/* ───── HERO ───── */
 const HeroSection = () => (
-  <section className="relative min-h-screen flex items-center overflow-hidden noise-bg grid-bg">
-    <div
-      className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-25"
-      style={{ backgroundImage: `url(${HERO_IMAGE})` }}
-    />
-    <div className="absolute inset-0 bg-gradient-to-b from-agro-darker/60 via-agro-dark/40 to-agro-dark" />
-    <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-neon-green/50 to-transparent" />
-
-    <div className="relative z-10 max-w-7xl mx-auto px-6 pt-24">
-      <div className="max-w-4xl">
-        <div className="flex items-center gap-3 mb-6 animate-fade-in" style={{ animationDelay: "0.1s" }}>
-          <div className="h-px w-12 bg-neon-green" />
-          <span className="text-neon-green font-golos text-sm tracking-[0.2em] uppercase">Точное земледелие нового поколения</span>
-        </div>
-
-        <h1
-          className="font-bebas text-[clamp(4rem,12vw,10rem)] leading-none text-white mb-4 animate-fade-up"
-          style={{ animationDelay: "0.2s" }}
-        >
-          Обработка полей{" "}
-          <span className="text-neon-green glow-neon">дронами</span>
+  <section className="relative min-h-[85vh] flex items-center overflow-hidden pt-16">
+    <div className="absolute inset-0">
+      <img src={IMG_HERO} alt="Поле" className="w-full h-full object-cover" />
+      <div className="absolute inset-0 bg-white/80" />
+    </div>
+    <div className="relative z-10 max-w-7xl mx-auto px-4 py-16 lg:py-24 w-full">
+      <div className="max-w-3xl">
+        <h1 className="font-golos font-bold text-[clamp(1.8rem,4.5vw,3.2rem)] text-gray-900 leading-tight mb-5 animate-fade-up">
+          Увеличивайте эффективность<br />
+          сельскохозяйственных работ и снижайте стоимость<br />
+          обработки полей с помощью&nbsp;
+          <span className="text-green-600">беспилотных дронов!</span>
         </h1>
 
-        <p
-          className="font-golos text-lg text-gray-300 max-w-2xl mb-10 leading-relaxed animate-fade-up"
-          style={{ animationDelay: "0.4s" }}
-        >
-          Профессиональная аэрообработка сельскохозяйственных угодий. Внесение удобрений, пестицидов и биологических препаратов с точностью до сантиметра. Быстро, выгодно, безопасно.
-        </p>
-
-        <div
-          className="flex flex-wrap gap-4 animate-fade-up"
-          style={{ animationDelay: "0.6s" }}
-        >
-          <a
-            href="#order"
-            className="bg-neon-green text-agro-dark font-golos font-bold text-base px-8 py-4 rounded-xl hover:bg-neon-lime transition-all duration-200 hover:scale-105 hover:shadow-[0_0_30px_rgba(74,255,107,0.4)] flex items-center gap-2"
-          >
-            <Icon name="Calculator" size={18} />
-            Рассчитать стоимость
-          </a>
-          <a
-            href="#capabilities"
-            className="border border-agro-border text-white font-golos text-base px-8 py-4 rounded-xl hover:border-neon-green/50 transition-all duration-200 flex items-center gap-2 hover:bg-white/5"
-          >
-            <Icon name="Play" size={18} className="text-neon-green" />
-            Что умеют дроны
-          </a>
-        </div>
-
-        <div
-          className="grid grid-cols-3 gap-8 mt-16 pt-10 border-t border-agro-border animate-fade-up max-w-xl"
-          style={{ animationDelay: "0.8s" }}
-        >
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 animate-fade-up" style={{animationDelay:"0.15s"}}>
           {[
-            { value: "500+", label: "га в сутки" },
-            { value: "3×", label: "быстрее техники" },
-            { value: "98%", label: "точность покрытия" },
-          ].map((s) => (
-            <div key={s.label}>
-              <div className="font-bebas text-4xl text-neon-green">{s.value}</div>
-              <div className="font-golos text-sm text-gray-400 mt-1">{s.label}</div>
+            {icon:"Zap", title:"Снижение затрат", desc:"Экономия до 40% по сравнению с наземной техникой"},
+            {icon:"Target", title:"Точная обработка", desc:"Равномерное покрытие 98%, нет пропусков и перерасхода"},
+            {icon:"Clock", title:"В 3–5 раз быстрее", desc:"До 500 га в сутки — быстрее любой наземной техники"},
+          ].map((f) => (
+            <div key={f.title} className="flex gap-3 bg-white/70 backdrop-blur-sm rounded-lg p-3 border border-gray-200 shadow-sm">
+              <div className="w-9 h-9 bg-green-100 rounded-lg flex items-center justify-center shrink-0">
+                <Icon name={f.icon} size={18} className="text-green-600" />
+              </div>
+              <div>
+                <div className="font-golos font-semibold text-gray-900 text-sm">{f.title}</div>
+                <div className="font-golos text-gray-500 text-xs mt-0.5">{f.desc}</div>
+              </div>
             </div>
           ))}
         </div>
-      </div>
-    </div>
 
-    <div className="absolute bottom-10 right-10 animate-float hidden lg:block">
-      <div className="w-24 h-24 border border-neon-green/20 rounded-full flex items-center justify-center">
-        <div className="w-16 h-16 border border-neon-green/40 rounded-full flex items-center justify-center">
-          <Icon name="Plane" size={28} className="text-neon-green rotate-45 animate-pulse-green" />
+        <div className="flex flex-wrap gap-3 animate-fade-up" style={{animationDelay:"0.3s"}}>
+          <a href="#order" className="bg-green-500 hover:bg-green-600 text-white font-golos font-semibold px-6 py-3 rounded-md text-sm transition-colors flex items-center gap-2">
+            <Icon name="Send" size={15} />Оставить заявку
+          </a>
+          <a href="#capabilities" className="border border-green-500 text-green-600 hover:bg-green-50 font-golos font-semibold px-6 py-3 rounded-md text-sm transition-colors flex items-center gap-2">
+            <Icon name="ChevronDown" size={15} />Узнать больше
+          </a>
         </div>
       </div>
     </div>
   </section>
 );
 
-const StatsSection = () => {
-  const ref = useRef<HTMLDivElement>(null);
-  const [started, setStarted] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) setStarted(true); },
-      { threshold: 0.3 }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, []);
-
-  const c1 = useCounter(500, 2000, started);
-  const c2 = useCounter(15, 2000, started);
-  const c3 = useCounter(30, 2000, started);
-  const c4 = useCounter(98, 2000, started);
-
-  return (
-    <div ref={ref} className="bg-neon-green py-16">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-          {[
-            { value: c1, suffix: "+", label: "га обработано за сутки", icon: "Layers" },
-            { value: c2, suffix: "+", label: "видов культур обрабатываем", icon: "Leaf" },
-            { value: c3, suffix: "%", label: "экономия воды vs наземная техника", icon: "Droplets" },
-            { value: c4, suffix: "%", label: "точность обработки поля", icon: "Target" },
-          ].map((s) => (
-            <div key={s.label} className="text-center">
-              <Icon name={s.icon} size={28} className="text-agro-dark mx-auto mb-2 opacity-60" />
-              <div className="font-bebas text-5xl text-agro-dark">
-                {s.value}{s.suffix}
-              </div>
-              <div className="font-golos text-sm text-agro-dark/70 mt-1 font-medium">{s.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
+/* ───── ADVANTAGES ───── */
 const AdvantagesSection = () => {
-  const advantages = [
-    {
-      icon: "Zap",
-      title: "Скорость обработки",
-      desc: "До 500 га в сутки — в 3–5 раз быстрее наземной техники. Идеально для срочных обработок в критические фазы роста.",
-    },
-    {
-      icon: "Crosshair",
-      title: "Точность нанесения",
-      desc: "GPS-навигация с точностью до 2 см. Равномерное перекрытие 98%+. Нет пропусков и перерасхода препаратов.",
-    },
-    {
-      icon: "TrendingDown",
-      title: "Экономия ресурсов",
-      desc: "На 30% меньше воды и препаратов по сравнению с наземной техникой. Прямое снижение себестоимости урожая.",
-    },
-    {
-      icon: "Shield",
-      title: "Безопасность посевов",
-      desc: "Нет уплотнения почвы и колеи. Не повреждает всходы. Работает на переувлажнённых полях, куда трактор не пройдёт.",
-    },
-    {
-      icon: "Clock",
-      title: "Работа 24/7",
-      desc: "Дроны работают в любое время суток и при ветре до 8 м/с. Ночные обработки в жаркое время — без испарения препаратов.",
-    },
-    {
-      icon: "BarChart2",
-      title: "Аналитика и отчёты",
-      desc: "После каждой обработки — детальный отчёт с треком полёта, расходом, картой покрытия. Полная прозрачность.",
-    },
+  const top = [
+    {icon:"Leaf",     title:"Экологичность", desc:"Снижение нагрузки на окружающую среду за счёт точного дозирования препаратов"},
+    {icon:"Droplets", title:"Экономия воды",  desc:"Расход воды в 8–10 раз меньше, чем у наземных опрыскивателей"},
+    {icon:"MapPin",   title:"Картографирование", desc:"Ортофотопланы и NDVI-карты для точного земледелия"},
+  ];
+  const bottom = [
+    {icon:"ShieldCheck",  title:"Безопасность",   desc:"Нет уплотнения почвы, нет повреждения всходов. Работает на переувлажнённых полях, куда трактор не пройдёт. Операторы аттестованы ФАВТ."},
+    {icon:"TrendingUp",   title:"Экономия до 30%", desc:"Снижение расхода препаратов на 30–40% по сравнению с наземными методами благодаря мелкодисперсному распылению и точному трекингу."},
+    {icon:"BarChart2",    title:"Аналитика и отчёты", desc:"Детальный отчёт после каждой обработки: трек полёта, расход, карта покрытия. Полная прозрачность перед заказчиком."},
   ];
 
   return (
-    <section id="advantages" className="py-24 bg-agro-dark">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="section-reveal mb-16">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-px w-12 bg-neon-green" />
-            <span className="text-neon-green font-golos text-sm tracking-[0.2em] uppercase">Почему мы</span>
-          </div>
-          <h2 className="font-bebas text-[clamp(2.5rem,6vw,5rem)] text-white leading-none">
-            Преимущества <span className="text-neon-green">дронирования</span>
+    <section id="advantages" className="py-16 bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="section-reveal mb-10">
+          <h2 className="font-golos font-bold text-2xl md:text-3xl text-gray-900">
+            Преимущества использования<br />наших дронов на<br />
+            <span className="text-green-600">Вашем хозяйстве</span>
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {advantages.map((a, i) => (
-            <div
-              key={a.title}
-              className="section-reveal glow-box-hover border border-agro-border bg-agro-card rounded-2xl p-6 transition-all duration-300 hover:border-neon-green/30 group"
-              style={{ transitionDelay: `${i * 0.1}s` }}
-            >
-              <div className="w-12 h-12 bg-neon-green/10 border border-neon-green/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-neon-green/20 transition-colors">
-                <Icon name={a.icon} size={22} className="text-neon-green" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          {top.map((f,i) => (
+            <div key={f.title} className="section-reveal bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-shadow" style={{transitionDelay:`${i*0.1}s`}}>
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-3">
+                <Icon name={f.icon} size={20} className="text-green-600" />
               </div>
-              <h3 className="font-golos font-bold text-white text-lg mb-2">{a.title}</h3>
-              <p className="font-golos text-gray-400 text-sm leading-relaxed">{a.desc}</p>
+              <h3 className="font-golos font-semibold text-gray-900 mb-1">{f.title}</h3>
+              <p className="font-golos text-gray-500 text-sm leading-relaxed">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {bottom.map((f,i) => (
+            <div key={f.title} className="section-reveal bg-white rounded-xl p-5 border border-gray-200 shadow-sm hover:shadow-md transition-shadow" style={{transitionDelay:`${(i+3)*0.1}s`}}>
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-3">
+                <Icon name={f.icon} size={20} className="text-green-600" />
+              </div>
+              <h3 className="font-golos font-semibold text-gray-900 mb-1">{f.title}</h3>
+              <p className="font-golos text-gray-500 text-sm leading-relaxed">{f.desc}</p>
             </div>
           ))}
         </div>
@@ -304,103 +180,72 @@ const AdvantagesSection = () => {
   );
 };
 
+/* ───── DRONES ───── */
 const DronesSection = () => {
   const drones = [
     {
-      name: "AgriBot X40",
-      type: "Опрыскиватель",
-      payload: "40 л",
-      area: "120 га/час",
-      speed: "8 м/с",
-      features: ["GPS RTK", "Радар уклонений", "Авторегулировка давления"],
-      badge: "Топ продаж",
+      name:"Дрон X40",
+      type:"Профессиональный опрыскиватель",
+      payload:"40 л",
+      area:"до 120 га/ч",
+      speed:"8 м/с",
+      features:["GPS RTK-навигация","Радар уклонений от препятствий","Система автоматического регулирования","Ночной режим работы","Защита от влаги IP67"],
+      img: IMG_DRONE,
     },
     {
-      name: "SkyFarm Pro 20",
-      type: "Опрыскиватель",
-      payload: "20 л",
-      area: "60 га/час",
-      speed: "7 м/с",
-      features: ["Ночной режим", "Авто-калибровка", "ИК-датчики высоты"],
-      badge: null,
-    },
-    {
-      name: "GrainSeeder S10",
-      type: "Высевающий",
-      payload: "10 кг",
-      area: "30 га/час",
-      speed: "6 м/с",
-      features: ["Центробежный рассев", "Регулировка потока", "Покрытие 10 м"],
-      badge: "Новинка",
-    },
-    {
-      name: "Scout Vision",
-      type: "Мониторинг",
-      payload: "RGB + NIR",
-      area: "200 га/час",
-      speed: "12 м/с",
-      features: ["Мультиспектр", "NDVI карты", "3D рельеф"],
-      badge: null,
+      name:"Scout Vision",
+      type:"Мониторинг и картографирование",
+      payload:"RGB+NIR",
+      area:"до 200 га/ч",
+      speed:"12 м/с",
+      features:["Мультиспектральные камеры","Построение NDVI-карт","3D-модели рельефа","Ортофотопланы","Интеграция с ГИС"],
+      img: IMG_FIELD,
     },
   ];
 
   return (
-    <section id="drones" className="py-24 bg-agro-darker grid-bg">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="section-reveal mb-16">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-px w-12 bg-neon-green" />
-            <span className="text-neon-green font-golos text-sm tracking-[0.2em] uppercase">Техника</span>
-          </div>
-          <h2 className="font-bebas text-[clamp(2.5rem,6vw,5rem)] text-white leading-none">
-            Наш парк <span className="text-neon-green">дронов</span>
+    <section id="drones" className="py-16 bg-white">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="section-reveal mb-8">
+          <h2 className="font-golos font-bold text-2xl md:text-3xl text-gray-900">
+            Работаем на новейшей<br />
+            <span className="text-green-600">высокотехнологичной технике</span>
           </h2>
-          <p className="font-golos text-gray-400 mt-4 max-w-2xl">
-            Современный флот агродронов для любых задач: от точечного опрыскивания до мониторинга тысяч гектаров
-          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-6">
           {drones.map((d, i) => (
-            <div
-              key={d.name}
-              className="section-reveal border border-agro-border bg-agro-card rounded-2xl p-6 glow-box-hover transition-all duration-300 hover:border-neon-green/30 group relative overflow-hidden"
-              style={{ transitionDelay: `${i * 0.1}s` }}
-            >
-              {d.badge && (
-                <span className="absolute top-4 right-4 bg-neon-green text-agro-dark text-xs font-bold px-3 py-1 rounded-full font-golos">
-                  {d.badge}
-                </span>
-              )}
-              <div className="flex items-start gap-4">
-                <div className="w-14 h-14 bg-neon-green/10 border border-neon-green/20 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-neon-green/20 transition-colors">
-                  <Icon name="Plane" size={26} className="text-neon-green rotate-45" />
-                </div>
-                <div>
-                  <div className="text-neon-green text-xs font-golos tracking-widest uppercase mb-1">{d.type}</div>
-                  <h3 className="font-golos font-bold text-white text-xl">{d.name}</h3>
+            <div key={d.name} className={`section-reveal grid grid-cols-1 lg:grid-cols-2 gap-0 rounded-xl overflow-hidden border border-gray-200 shadow-sm`} style={{transitionDelay:`${i*0.1}s`}}>
+              <div className="relative h-60 lg:h-auto">
+                <img src={d.img} alt={d.name} className="w-full h-full object-cover" />
+                <div className="absolute bottom-3 left-3 bg-green-600 text-white font-golos font-bold text-sm px-3 py-1 rounded">
+                  {d.name}
                 </div>
               </div>
-
-              <div className="grid grid-cols-3 gap-4 mt-5 pt-5 border-t border-agro-border">
-                {[
-                  { label: "Загрузка", val: d.payload },
-                  { label: "Площадь/ч", val: d.area },
-                  { label: "Скорость", val: d.speed },
-                ].map((s) => (
-                  <div key={s.label}>
-                    <div className="font-golos text-xs text-gray-500 mb-1">{s.label}</div>
-                    <div className="font-golos font-bold text-white text-sm">{s.val}</div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex flex-wrap gap-2 mt-4">
-                {d.features.map((f) => (
-                  <span key={f} className="text-xs font-golos text-neon-green border border-neon-green/20 rounded-full px-3 py-1 bg-neon-green/5">
-                    {f}
-                  </span>
-                ))}
+              <div className="bg-gray-50 p-6">
+                <div className="inline-block bg-green-100 text-green-700 text-xs font-golos font-semibold px-3 py-1 rounded-full mb-3">
+                  {d.type}
+                </div>
+                <div className="grid grid-cols-3 gap-3 mb-4">
+                  {[
+                    {l:"Загрузка", v:d.payload},
+                    {l:"Площадь/ч", v:d.area},
+                    {l:"Скорость", v:d.speed},
+                  ].map(s => (
+                    <div key={s.l} className="bg-white rounded-lg p-2 border border-gray-200 text-center">
+                      <div className="font-golos font-bold text-green-600 text-sm">{s.v}</div>
+                      <div className="font-golos text-gray-400 text-xs mt-0.5">{s.l}</div>
+                    </div>
+                  ))}
+                </div>
+                <ul className="space-y-1.5">
+                  {d.features.map(f => (
+                    <li key={f} className="flex items-start gap-2 text-sm font-golos text-gray-700">
+                      <Icon name="Check" size={14} className="text-green-500 mt-0.5 shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
           ))}
@@ -410,96 +255,38 @@ const DronesSection = () => {
   );
 };
 
+/* ───── CAPABILITIES ───── */
 const CapabilitiesSection = () => {
   const caps = [
-    { icon: "Droplets", title: "Внесение СЗР", desc: "Гербициды, фунгициды, инсектициды, регуляторы роста. Точное нанесение без дрейфа и перерасхода." },
-    { icon: "Sprout", title: "Подкормка удобрениями", desc: "Жидкие и гранулированные удобрения. Дифференцированное внесение по картам предписаний NDVI." },
-    { icon: "Scan", title: "Мониторинг посевов", desc: "Мультиспектральная съёмка, построение NDVI-карт, выявление стресса, болезней, сорняков на ранней стадии." },
-    { icon: "Wind", title: "Биологическая защита", desc: "Внесение энтомофагов и биопрепаратов для экологического земледелия. Совместимо с органическим производством." },
-    { icon: "Map", title: "Картографирование", desc: "3D-модели рельефа, ортофотопланы высокого разрешения, цифровые модели полей для точного земледелия." },
-    { icon: "Leaf", title: "Высев семян", desc: "Подсев трав, рапса, покровных культур. Восстановление прогалин без перепашки." },
+    {icon:"Droplets",  title:"Обработка полей от вредителей",     desc:"Подробнее", img:IMG_HERO},
+    {icon:"Sprout",    title:"Внесение средств защиты растений",   desc:"Подробнее", img:IMG_FIELD},
+    {icon:"Bug",       title:"Агрохимическая борьба с сорняками",  desc:"Подробнее", img:IMG_DRONE},
+    {icon:"ScanLine",  title:"Построение NDVI карт культур",       desc:"Подробнее", img:IMG_HERO},
+    {icon:"Leaf",      title:"Высев покровных трав",               desc:"Подробнее", img:IMG_FIELD},
+    {icon:"Map",       title:"Мы обработаем поля дронами",         desc:"Подробнее", img:IMG_DRONE},
   ];
 
   return (
-    <section id="capabilities" className="py-24 bg-agro-dark">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="section-reveal mb-16">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-px w-12 bg-neon-green" />
-            <span className="text-neon-green font-golos text-sm tracking-[0.2em] uppercase">Возможности</span>
-          </div>
-          <h2 className="font-bebas text-[clamp(2.5rem,6vw,5rem)] text-white leading-none">
-            Что умеют <span className="text-neon-green">наши дроны</span>
+    <section id="capabilities" className="py-16 bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="section-reveal mb-8">
+          <h2 className="font-golos font-bold text-2xl md:text-3xl text-gray-900">
+            Что могут наши дроны:
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {caps.map((c, i) => (
-            <div
-              key={c.title}
-              className="section-reveal flex gap-4 p-5 rounded-2xl border border-agro-border bg-agro-card hover:border-neon-green/30 glow-box-hover transition-all duration-300"
-              style={{ transitionDelay: `${i * 0.1}s` }}
-            >
-              <div className="w-10 h-10 bg-neon-green/10 rounded-lg flex items-center justify-center shrink-0 mt-1">
-                <Icon name={c.icon} size={20} className="text-neon-green" />
+            <div key={c.title} className="section-reveal rounded-xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-md transition-shadow group" style={{transitionDelay:`${i*0.08}s`}}>
+              <div className="relative h-40 overflow-hidden">
+                <img src={c.img} alt={c.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
               </div>
-              <div>
-                <h3 className="font-golos font-bold text-white mb-1">{c.title}</h3>
-                <p className="font-golos text-gray-400 text-sm leading-relaxed">{c.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-};
-
-const WorksSection = () => {
-  const works = [
-    { type: "Опрыскивание", crop: "Пшеница", area: "1 240 га", region: "Краснодарский край", result: "Снижение потерь урожая на 18%" },
-    { type: "Мониторинг NDVI", crop: "Кукуруза", area: "850 га", region: "Ростовская область", result: "Выявлены 3 очага болезни на ранней стадии" },
-    { type: "Внесение удобрений", crop: "Подсолнечник", area: "2 100 га", region: "Ставропольский край", result: "+12% к урожайности vs план" },
-    { type: "Высев трав", crop: "Многолетние травы", area: "340 га", region: "Воронежская область", result: "Восстановление после засухи за 1 сезон" },
-    { type: "Биозащита", crop: "Свёкла", area: "600 га", region: "Тамбовская область", result: "Полный отказ от химии, сертификат Organic" },
-    { type: "Опрыскивание ночью", crop: "Соя", area: "1 780 га", region: "Самарская область", result: "Эффективность +25% vs дневная обработка" },
-  ];
-
-  return (
-    <section id="works" className="py-24 bg-agro-darker">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="section-reveal mb-16">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-px w-12 bg-neon-green" />
-            <span className="text-neon-green font-golos text-sm tracking-[0.2em] uppercase">Кейсы</span>
-          </div>
-          <h2 className="font-bebas text-[clamp(2.5rem,6vw,5rem)] text-white leading-none">
-            Примеры <span className="text-neon-green">выполненных работ</span>
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {works.map((w, i) => (
-            <div
-              key={i}
-              className="section-reveal border border-agro-border bg-agro-card rounded-2xl p-5 glow-box-hover hover:border-neon-green/30 transition-all duration-300 group"
-              style={{ transitionDelay: `${i * 0.08}s` }}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-golos text-neon-green border border-neon-green/30 rounded-full px-3 py-1 bg-neon-green/5">
-                  {w.type}
-                </span>
-                <Icon name="MapPin" size={14} className="text-gray-500" />
-              </div>
-              <div className="font-golos font-bold text-white text-lg mb-1">{w.crop}</div>
-              <div className="font-golos text-gray-400 text-sm mb-3">{w.region}</div>
-              <div className="flex items-center gap-2 text-gray-400 text-sm mb-4">
-                <Icon name="Layers" size={14} className="text-neon-green" />
-                <span className="font-golos">{w.area}</span>
-              </div>
-              <div className="pt-3 border-t border-agro-border flex items-start gap-2">
-                <Icon name="TrendingUp" size={14} className="text-neon-green mt-0.5 shrink-0" />
-                <span className="font-golos text-sm text-gray-300">{w.result}</span>
+              <div className="bg-white p-4">
+                <h3 className="font-golos font-semibold text-gray-900 text-sm mb-2">{c.title}</h3>
+                <a href="#order" className="font-golos text-green-600 text-xs font-semibold hover:text-green-700 flex items-center gap-1">
+                  {c.desc}<Icon name="ChevronRight" size={12} />
+                </a>
               </div>
             </div>
           ))}
@@ -509,154 +296,236 @@ const WorksSection = () => {
   );
 };
 
-const ProcessSection = () => {
-  const steps = [
-    { num: "01", title: "Заявка и расчёт", desc: "Оставляете заявку с параметрами поля. Рассчитываем стоимость и подбираем технику за 2 часа." },
-    { num: "02", title: "Выезд и подготовка", desc: "Агроном выезжает на поле, оценивает условия, составляет карту полёта и план обработки." },
-    { num: "03", title: "Обработка", desc: "Бригада операторов дронов выполняет обработку в согласованные сроки. Контроль в реальном времени." },
-    { num: "04", title: "Отчёт", desc: "Получаете детальный отчёт с треком, расходом препарата, картой покрытия и фотоотчётом." },
-  ];
-
-  return (
-    <section className="py-24 bg-agro-dark">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="section-reveal mb-16">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-px w-12 bg-neon-green" />
-            <span className="text-neon-green font-golos text-sm tracking-[0.2em] uppercase">Процесс</span>
-          </div>
-          <h2 className="font-bebas text-[clamp(2.5rem,6vw,5rem)] text-white leading-none">
-            Как мы <span className="text-neon-green">работаем</span>
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {steps.map((s, i) => (
-            <div
-              key={s.num}
-              className="section-reveal relative"
-              style={{ transitionDelay: `${i * 0.15}s` }}
-            >
-              <div className="relative z-10">
-                <div className="font-bebas text-6xl text-neon-green/20 mb-2">{s.num}</div>
-                <div className="w-10 h-10 border-2 border-neon-green rounded-full flex items-center justify-center mb-4 bg-agro-dark">
-                  <div className="w-3 h-3 rounded-full bg-neon-green" />
-                </div>
-                <h3 className="font-golos font-bold text-white text-lg mb-2">{s.title}</h3>
-                <p className="font-golos text-gray-400 text-sm leading-relaxed">{s.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+/* ───── ORDER BANNER ───── */
+const OrderBanner = () => (
+  <section className="relative overflow-hidden">
+    <div className="absolute inset-0">
+      <img src={IMG_FIELD} alt="Поле" className="w-full h-full object-cover" />
+      <div className="absolute inset-0 bg-dark/75" />
+    </div>
+    <div className="relative z-10 max-w-7xl mx-auto px-4 py-16">
+      <div className="max-w-2xl">
+        <h2 className="font-golos font-bold text-2xl md:text-3xl text-white mb-2">
+          Оставьте заявку на
+        </h2>
+        <h2 className="font-golos font-bold text-2xl md:text-3xl text-white mb-4">
+          индивидуальный расчёт стоимости<br />
+          работы на вашем участке
+        </h2>
+        <a href="#order" className="bg-green-500 hover:bg-green-600 text-white font-golos font-semibold px-6 py-3 rounded-md text-sm transition-colors inline-flex items-center gap-2">
+          <Icon name="Calculator" size={15} />Рассчитать стоимость
+        </a>
       </div>
-    </section>
-  );
-};
+    </div>
+  </section>
+);
 
+/* ───── ABOUT ───── */
 const AboutSection = () => (
-  <section id="about" className="py-24 bg-agro-darker grid-bg">
-    <div className="max-w-7xl mx-auto px-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+  <section id="about" className="py-16 bg-white">
+    <div className="max-w-7xl mx-auto px-4">
+      <div className="section-reveal mb-8">
+        <h2 className="font-golos font-bold text-2xl md:text-3xl text-gray-900">О компании</h2>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         <div className="section-reveal">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="h-px w-12 bg-neon-green" />
-            <span className="text-neon-green font-golos text-sm tracking-[0.2em] uppercase">О нас</span>
+          <div className="relative rounded-xl overflow-hidden h-72 mb-4">
+            <img src={IMG_FARMER} alt="Агроном" className="w-full h-full object-cover" />
+            <div className="absolute bottom-3 left-3 bg-green-600 text-white text-xs font-golos font-semibold px-3 py-1.5 rounded">
+              15 000+ га обработано
+            </div>
           </div>
-          <h2 className="font-bebas text-[clamp(2.5rem,6vw,5rem)] text-white leading-none mb-6">
-            Профессионалы <span className="text-neon-green">точного земледелия</span>
-          </h2>
-          <p className="font-golos text-gray-300 text-base leading-relaxed mb-5">
-            Мы — команда агрономов и инженеров-дронщиков с опытом работы более 5 лет. Специализируемся на точечных аэрообработках для хозяйств любого масштаба — от семейной фермы до агрохолдинга.
-          </p>
-          <p className="font-golos text-gray-400 text-sm leading-relaxed mb-8">
-            Всё оборудование сертифицировано. Операторы имеют допуск ФАВТ. Работаем по всему Югу и Центру России. Готовы выехать в любой регион при объёме от 500 га.
-          </p>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             {[
-              { icon: "Award", text: "Лицензия ФАВТ" },
-              { icon: "Users", text: "Команда 20+ человек" },
-              { icon: "Globe", text: "10 регионов России" },
-              { icon: "Star", text: "5 лет на рынке" },
-            ].map((f) => (
-              <div key={f.text} className="flex items-center gap-3">
-                <Icon name={f.icon} size={18} className="text-neon-green shrink-0" />
-                <span className="font-golos text-sm text-gray-300">{f.text}</span>
+              {v:"5+",    l:"лет на рынке"},
+              {v:"280+",  l:"проектов"},
+              {v:"97%",   l:"клиентов возвращаются"},
+              {v:"10",    l:"регионов России"},
+            ].map(s => (
+              <div key={s.l} className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-center">
+                <div className="font-golos font-bold text-green-600 text-xl">{s.v}</div>
+                <div className="font-golos text-gray-500 text-xs mt-0.5">{s.l}</div>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="section-reveal grid grid-cols-2 gap-4">
-          {[
-            { val: "5+", label: "лет опыта" },
-            { val: "280+", label: "завершённых проектов" },
-            { val: "15 000+", label: "га обработано" },
-            { val: "97%", label: "клиентов возвращаются" },
-          ].map((s) => (
-            <div key={s.label} className="bg-agro-card border border-agro-border rounded-2xl p-6 glow-box text-center">
-              <div className="font-bebas text-4xl text-neon-green mb-2">{s.val}</div>
-              <div className="font-golos text-sm text-gray-400">{s.label}</div>
+        <div className="section-reveal">
+          <h3 className="font-golos font-semibold text-gray-800 mb-3">Компания работает по многим регионам России:</h3>
+          {/* Stylised map placeholder */}
+          <div className="bg-green-50 border border-green-200 rounded-xl h-56 flex items-center justify-center mb-4 relative overflow-hidden">
+            <img src={IMG_HERO} alt="Карта" className="w-full h-full object-cover opacity-20" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+              <Icon name="Map" size={40} className="text-green-500 opacity-60" />
+              <span className="font-golos text-green-700 text-sm font-semibold">10 регионов России</span>
             </div>
-          ))}
+            {/* Region markers */}
+            {[
+              {t:"Краснодарский край", x:"25%", y:"70%"},
+              {t:"Ставропольский край", x:"35%", y:"60%"},
+              {t:"Ростовская обл.", x:"28%", y:"50%"},
+              {t:"Воронежская обл.", x:"38%", y:"35%"},
+              {t:"Самарская обл.", x:"55%", y:"30%"},
+            ].map(m => (
+              <div key={m.t} className="absolute flex items-center gap-1" style={{left:m.x,top:m.y}}>
+                <div className="w-2.5 h-2.5 bg-green-600 rounded-full border-2 border-white shadow" />
+                <span className="font-golos text-[10px] text-green-900 bg-white/80 px-1 rounded hidden md:block">{m.t}</span>
+              </div>
+            ))}
+          </div>
+          <p className="font-golos text-gray-600 text-sm leading-relaxed">
+            Профессиональная команда агрономов и операторов дронов с опытом более 5 лет. Обслуживаем хозяйства от 50 га до крупных агрохолдингов. Лицензия ФАВТ, сертифицированное оборудование.
+          </p>
+          <div className="flex flex-wrap gap-2 mt-4">
+            {["Лицензия ФАВТ","Сертифицированное оборудование","Страхование ответственности","Гарантия результата"].map(t => (
+              <span key={t} className="text-xs font-golos text-green-700 bg-green-50 border border-green-200 rounded-full px-3 py-1">{t}</span>
+            ))}
+          </div>
         </div>
       </div>
     </div>
   </section>
 );
 
-const OrderSection = () => {
-  const [form, setForm] = useState({
-    name: "",
-    phone: "",
-    address: "",
-    area: "",
-    workType: "",
-    deadline: "",
-    comment: "",
-  });
-  const [submitted, setSubmitted] = useState(false);
-
-  const workTypes = [
-    "Опрыскивание СЗР",
-    "Внесение удобрений",
-    "Мониторинг NDVI",
-    "Высев семян",
-    "Биозащита",
-    "Картографирование",
-    "Другое",
+/* ───── CROPS ───── */
+const CropsSection = () => {
+  const crops = [
+    {icon:"Wheat",     title:"Зерновые культуры",  items:["Пшеница","Ячмень","Рожь","Тритикале"]},
+    {icon:"Leaf",      title:"Рапсовые поля",       items:["Озимый рапс","Яровой рапс","Горчица"]},
+    {icon:"Sprout",    title:"Подсолнечник и кукуруза", items:["Подсолнечник","Кукуруза на зерно","Кукуруза на силос"]},
+    {icon:"Apple",     title:"Ягодные плантации",   items:["Клубника","Малина","Смородина"]},
+    {icon:"TreePine",  title:"Сады",                items:["Яблоня","Груша","Косточковые"]},
+    {icon:"Flower2",   title:"Виноградники",        items:["Технические сорта","Столовые сорта"]},
   ];
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-  };
+  return (
+    <section id="crops" className="py-16 bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="section-reveal mb-8">
+          <h2 className="font-golos font-bold text-2xl md:text-3xl text-gray-900">
+            Проводим обработку всех видов культур:
+          </h2>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {crops.map((c,i) => (
+            <div key={c.title} className="section-reveal bg-white rounded-xl p-4 border border-gray-200 shadow-sm" style={{transitionDelay:`${i*0.08}s`}}>
+              <div className="flex items-center gap-2 mb-2">
+                <Icon name={c.icon} size={18} className="text-green-600" />
+                <h3 className="font-golos font-semibold text-gray-900 text-sm">{c.title}</h3>
+              </div>
+              <ul className="space-y-1">
+                {c.items.map(item => (
+                  <li key={item} className="font-golos text-gray-500 text-xs flex items-center gap-1.5">
+                    <span className="w-1 h-1 bg-green-400 rounded-full shrink-0" />{item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+/* ───── WORKS / ПРИМЕРЫ ───── */
+const WorksSection = () => {
+  const examples = [
+    {
+      title:"Дезинсекция подсолнечника",
+      before:IMG_FIELD,
+      after:IMG_HERO,
+      label:"Выполнено",
+      details:"Краснодарский кр. · 1 240 га · Снижение поражённости на 87%",
+    },
+    {
+      title:"Химическое уничтожение сорняков",
+      before:IMG_HERO,
+      after:IMG_FIELD,
+      label:"Выполнено",
+      details:"Ростовская обл. · 850 га · Всходы сорняков снижены до 2%",
+    },
+  ];
 
   return (
-    <section id="order" className="py-24 bg-agro-dark">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-          <div className="section-reveal">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-px w-12 bg-neon-green" />
-              <span className="text-neon-green font-golos text-sm tracking-[0.2em] uppercase">Заявка</span>
+    <section id="works" className="py-16 bg-white">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="section-reveal mb-8">
+          <h2 className="font-golos font-bold text-2xl md:text-3xl text-gray-900">Пример обработки полей</h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+          {examples.map((ex,i) => (
+            <div key={ex.title} className="section-reveal rounded-xl overflow-hidden border border-gray-200 shadow-sm" style={{transitionDelay:`${i*0.1}s`}}>
+              <div className="grid grid-cols-2">
+                <div className="relative">
+                  <img src={ex.before} alt="До" className="w-full h-44 object-cover" />
+                  <div className="absolute top-2 left-2 bg-gray-800 text-white text-xs font-golos font-bold px-2 py-0.5 rounded">ДО</div>
+                </div>
+                <div className="relative">
+                  <img src={ex.after} alt="После" className="w-full h-44 object-cover" />
+                  <div className="absolute top-2 left-2 bg-green-600 text-white text-xs font-golos font-bold px-2 py-0.5 rounded">ПОСЛЕ</div>
+                </div>
+              </div>
+              <div className="bg-white p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="bg-green-100 text-green-700 text-xs font-golos font-semibold px-2 py-0.5 rounded">{ex.label}</span>
+                  <h3 className="font-golos font-semibold text-gray-900 text-sm">{ex.title}</h3>
+                </div>
+                <p className="font-golos text-gray-500 text-xs">{ex.details}</p>
+              </div>
             </div>
-            <h2 className="font-bebas text-[clamp(2.5rem,6vw,5rem)] text-white leading-none mb-6">
-              Рассчитать <span className="text-neon-green">стоимость</span>
+          ))}
+        </div>
+
+        {/* CTA banner with drone image */}
+        <div className="section-reveal relative rounded-2xl overflow-hidden">
+          <img src={IMG_DRONE} alt="Дрон" className="absolute right-0 bottom-0 h-full object-cover w-1/2 object-center opacity-30 lg:opacity-70" />
+          <div className="relative z-10 bg-gradient-to-r from-dark to-dark/60 lg:from-dark lg:via-dark/80 lg:to-transparent p-8 md:p-12">
+            <p className="font-golos text-green-400 text-sm font-semibold mb-2 uppercase tracking-wider">Уважаемый аграрий,</p>
+            <h3 className="font-golos font-bold text-white text-xl md:text-2xl mb-4 max-w-lg">
+              давайте начнём знакомство с расчёта стоимости обработки Вашего поля с помощью наших дронов
+            </h3>
+            <a href="#order" className="bg-green-500 hover:bg-green-600 text-white font-golos font-semibold px-6 py-3 rounded-md text-sm transition-colors inline-flex items-center gap-2">
+              <Icon name="Calculator" size={15} />Рассчитать стоимость
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+/* ───── ORDER FORM ───── */
+const OrderSection = () => {
+  const [form, setForm] = useState({name:"",phone:"",address:"",area:"",workType:"",deadline:"",comment:""});
+  const [submitted, setSubmitted] = useState(false);
+
+  const workTypes = ["Опрыскивание СЗР","Внесение удобрений","Мониторинг NDVI","Высев семян","Биозащита","Картографирование","Другое"];
+
+  const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); setSubmitted(true); };
+
+  return (
+    <section id="order" className="py-16 bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+          <div className="section-reveal">
+            <h2 className="font-golos font-bold text-2xl md:text-3xl text-gray-900 mb-3">
+              Оставьте заявку на<br />
+              <span className="text-green-600">расчёт стоимости</span>
             </h2>
-            <p className="font-golos text-gray-400 text-base leading-relaxed mb-8">
-              Заполните форму — наш агроном свяжется с вами в течение 2 часов и предложит оптимальное решение для вашего поля.
-            </p>
-            <div className="space-y-4">
+            <p className="font-golos text-gray-500 text-sm mb-6">Наш агроном свяжется с вами в течение 2 часов в рабочее время и предложит оптимальное решение.</p>
+            <div className="space-y-3">
               {[
-                { icon: "Phone", text: "+7 (800) 555-00-00" },
-                { icon: "Mail", text: "zakaz@agrondron.ru" },
-                { icon: "Clock", text: "Ответ за 2 часа в рабочее время" },
-              ].map((c) => (
-                <div key={c.text} className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-neon-green/10 rounded-lg flex items-center justify-center">
-                    <Icon name={c.icon} size={18} className="text-neon-green" />
+                {icon:"Phone", t:"+7 (800) 555-00-00"},
+                {icon:"Mail",  t:"zakaz@agrodron.ru"},
+                {icon:"Clock", t:"Пн–Пт: 8:00–20:00, Сб–Вс: 9:00–18:00"},
+              ].map(c => (
+                <div key={c.t} className="flex items-center gap-3">
+                  <div className="w-9 h-9 bg-green-100 rounded-lg flex items-center justify-center shrink-0">
+                    <Icon name={c.icon} size={16} className="text-green-600" />
                   </div>
-                  <span className="font-golos text-gray-300">{c.text}</span>
+                  <span className="font-golos text-gray-700 text-sm">{c.t}</span>
                 </div>
               ))}
             </div>
@@ -664,112 +533,62 @@ const OrderSection = () => {
 
           <div className="section-reveal">
             {submitted ? (
-              <div className="bg-agro-card border border-neon-green/30 rounded-2xl p-10 text-center glow-box">
-                <div className="w-16 h-16 bg-neon-green/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Icon name="CheckCircle" size={32} className="text-neon-green" />
+              <div className="bg-white border border-green-200 rounded-xl p-10 text-center shadow-sm">
+                <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Icon name="CheckCircle" size={28} className="text-green-600" />
                 </div>
-                <h3 className="font-bebas text-3xl text-white mb-2">Заявка принята!</h3>
-                <p className="font-golos text-gray-400">Наш агроном свяжется с вами в течение 2 часов.</p>
+                <h3 className="font-golos font-bold text-xl text-gray-900 mb-1">Заявка принята!</h3>
+                <p className="font-golos text-gray-500 text-sm">Свяжемся с вами в течение 2 часов.</p>
               </div>
             ) : (
-              <form
-                onSubmit={handleSubmit}
-                className="bg-agro-card border border-agro-border rounded-2xl p-6 space-y-4"
-              >
+              <form onSubmit={handleSubmit} className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="font-golos text-xs text-gray-400 mb-1.5 block">Ваше имя *</label>
-                    <input
-                      required
-                      value={form.name}
-                      onChange={(e) => setForm({ ...form, name: e.target.value })}
-                      placeholder="Иван Петров"
-                      className="w-full bg-agro-darker border border-agro-border rounded-xl px-4 py-3 font-golos text-white text-sm placeholder-gray-600 focus:outline-none focus:border-neon-green/50 transition-colors"
-                    />
+                    <label className="font-golos text-xs text-gray-500 mb-1 block">Ваше имя *</label>
+                    <input required value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Иван Петров"
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2.5 font-golos text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-green-400 transition-colors" />
                   </div>
                   <div>
-                    <label className="font-golos text-xs text-gray-400 mb-1.5 block">Телефон *</label>
-                    <input
-                      required
-                      value={form.phone}
-                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                      placeholder="+7 (999) 000-00-00"
-                      className="w-full bg-agro-darker border border-agro-border rounded-xl px-4 py-3 font-golos text-white text-sm placeholder-gray-600 focus:outline-none focus:border-neon-green/50 transition-colors"
-                    />
+                    <label className="font-golos text-xs text-gray-500 mb-1 block">Телефон *</label>
+                    <input required value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} placeholder="+7 (999) 000-00-00"
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2.5 font-golos text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-green-400 transition-colors" />
                   </div>
                 </div>
-
                 <div>
-                  <label className="font-golos text-xs text-gray-400 mb-1.5 block">Тип работ *</label>
-                  <select
-                    required
-                    value={form.workType}
-                    onChange={(e) => setForm({ ...form, workType: e.target.value })}
-                    className="w-full bg-agro-darker border border-agro-border rounded-xl px-4 py-3 font-golos text-white text-sm focus:outline-none focus:border-neon-green/50 transition-colors appearance-none cursor-pointer"
-                  >
-                    <option value="" disabled className="text-gray-600">Выберите тип работ</option>
-                    {workTypes.map((t) => (
-                      <option key={t} value={t} className="bg-agro-darker">{t}</option>
-                    ))}
+                  <label className="font-golos text-xs text-gray-500 mb-1 block">Тип работ *</label>
+                  <select required value={form.workType} onChange={e=>setForm({...form,workType:e.target.value})}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 font-golos text-sm text-gray-900 focus:outline-none focus:border-green-400 transition-colors appearance-none bg-white">
+                    <option value="" disabled>Выберите тип работ</option>
+                    {workTypes.map(t=><option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
-
                 <div>
-                  <label className="font-golos text-xs text-gray-400 mb-1.5 block">Адрес / местоположение поля *</label>
-                  <input
-                    required
-                    value={form.address}
-                    onChange={(e) => setForm({ ...form, address: e.target.value })}
-                    placeholder="Краснодарский край, Тимашевский район"
-                    className="w-full bg-agro-darker border border-agro-border rounded-xl px-4 py-3 font-golos text-white text-sm placeholder-gray-600 focus:outline-none focus:border-neon-green/50 transition-colors"
-                  />
+                  <label className="font-golos text-xs text-gray-500 mb-1 block">Адрес / местоположение поля *</label>
+                  <input required value={form.address} onChange={e=>setForm({...form,address:e.target.value})} placeholder="Краснодарский край, Тимашевский район"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 font-golos text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-green-400 transition-colors" />
                 </div>
-
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="font-golos text-xs text-gray-400 mb-1.5 block">Примерная площадь, га *</label>
-                    <input
-                      required
-                      type="number"
-                      value={form.area}
-                      onChange={(e) => setForm({ ...form, area: e.target.value })}
-                      placeholder="500"
-                      min="1"
-                      className="w-full bg-agro-darker border border-agro-border rounded-xl px-4 py-3 font-golos text-white text-sm placeholder-gray-600 focus:outline-none focus:border-neon-green/50 transition-colors"
-                    />
+                    <label className="font-golos text-xs text-gray-500 mb-1 block">Площадь, га *</label>
+                    <input required type="number" min="1" value={form.area} onChange={e=>setForm({...form,area:e.target.value})} placeholder="500"
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2.5 font-golos text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-green-400 transition-colors" />
                   </div>
                   <div>
-                    <label className="font-golos text-xs text-gray-400 mb-1.5 block">Желаемые сроки</label>
-                    <input
-                      type="date"
-                      value={form.deadline}
-                      onChange={(e) => setForm({ ...form, deadline: e.target.value })}
-                      className="w-full bg-agro-darker border border-agro-border rounded-xl px-4 py-3 font-golos text-white text-sm focus:outline-none focus:border-neon-green/50 transition-colors"
-                    />
+                    <label className="font-golos text-xs text-gray-500 mb-1 block">Желаемые сроки</label>
+                    <input type="date" value={form.deadline} onChange={e=>setForm({...form,deadline:e.target.value})}
+                      className="w-full border border-gray-200 rounded-lg px-3 py-2.5 font-golos text-sm text-gray-900 focus:outline-none focus:border-green-400 transition-colors" />
                   </div>
                 </div>
-
                 <div>
-                  <label className="font-golos text-xs text-gray-400 mb-1.5 block">Комментарий</label>
-                  <textarea
-                    value={form.comment}
-                    onChange={(e) => setForm({ ...form, comment: e.target.value })}
-                    placeholder="Культура, фаза развития, препарат (если есть)..."
-                    rows={3}
-                    className="w-full bg-agro-darker border border-agro-border rounded-xl px-4 py-3 font-golos text-white text-sm placeholder-gray-600 focus:outline-none focus:border-neon-green/50 transition-colors resize-none"
-                  />
+                  <label className="font-golos text-xs text-gray-500 mb-1 block">Комментарий</label>
+                  <textarea rows={3} value={form.comment} onChange={e=>setForm({...form,comment:e.target.value})} placeholder="Культура, фаза развития, препарат..."
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2.5 font-golos text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-green-400 transition-colors resize-none" />
                 </div>
-
-                <button
-                  type="submit"
-                  className="w-full bg-neon-green text-agro-dark font-golos font-bold text-base py-4 rounded-xl hover:bg-neon-lime transition-all duration-200 hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(74,255,107,0.4)] flex items-center justify-center gap-2"
-                >
-                  <Icon name="Send" size={18} />
-                  Получить расчёт стоимости
+                <button type="submit"
+                  className="w-full bg-green-500 hover:bg-green-600 text-white font-golos font-semibold py-3 rounded-lg text-sm transition-colors flex items-center justify-center gap-2 hover:scale-[1.01] active:scale-100">
+                  <Icon name="Send" size={15} />Отправить заявку
                 </button>
-                <p className="text-center font-golos text-xs text-gray-500">
-                  Нажимая кнопку, вы соглашаетесь с политикой конфиденциальности
-                </p>
+                <p className="text-center font-golos text-xs text-gray-400">Нажимая кнопку, вы соглашаетесь с политикой конфиденциальности</p>
               </form>
             )}
           </div>
@@ -779,52 +598,65 @@ const OrderSection = () => {
   );
 };
 
+/* ───── FOOTER ───── */
 const Footer = () => (
-  <footer className="bg-agro-darker border-t border-agro-border py-12">
-    <div className="max-w-7xl mx-auto px-6">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-neon-green rounded-sm flex items-center justify-center">
-            <Icon name="Plane" size={16} className="text-agro-dark rotate-45" />
+  <footer className="bg-dark text-gray-300 py-10">
+    <div className="max-w-7xl mx-auto px-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-7 h-7 bg-green-500 rounded flex items-center justify-center">
+              <Icon name="Plane" size={14} className="text-white rotate-45" />
+            </div>
+            <span className="font-golos font-bold text-white text-lg">АгроДрон</span>
           </div>
-          <span className="font-bebas text-2xl text-white tracking-widest">АгроДрон</span>
+          <p className="font-golos text-gray-400 text-xs leading-relaxed">Профессиональная обработка полей дронами по всей России</p>
         </div>
-        <div className="flex flex-wrap gap-6 justify-center">
-          {[
-            { href: "#advantages", label: "Преимущества" },
-            { href: "#drones", label: "Дроны" },
-            { href: "#capabilities", label: "Возможности" },
-            { href: "#works", label: "Работы" },
-            { href: "#about", label: "О компании" },
-            { href: "#order", label: "Заявка" },
-          ].map((l) => (
-            <a key={l.href} href={l.href} className="font-golos text-sm text-gray-500 hover:text-neon-green transition-colors">
-              {l.label}
-            </a>
-          ))}
+        <div>
+          <h4 className="font-golos font-semibold text-white text-sm mb-3">Услуги</h4>
+          <ul className="space-y-1.5">
+            {["Опрыскивание СЗР","Внесение удобрений","Мониторинг NDVI","Высев семян"].map(t=>(
+              <li key={t}><a href="#capabilities" className="font-golos text-gray-400 text-xs hover:text-green-400 transition-colors">{t}</a></li>
+            ))}
+          </ul>
         </div>
-        <div className="font-golos text-xs text-gray-600 text-center">
-          © 2024 АгроДрон. Все права защищены.
+        <div>
+          <h4 className="font-golos font-semibold text-white text-sm mb-3">Компания</h4>
+          <ul className="space-y-1.5">
+            {[["#about","О компании"],["#works","Примеры работ"],["#drones","Техника"],["#order","Контакты"]].map(([h,l])=>(
+              <li key={h}><a href={h} className="font-golos text-gray-400 text-xs hover:text-green-400 transition-colors">{l}</a></li>
+            ))}
+          </ul>
         </div>
+        <div>
+          <h4 className="font-golos font-semibold text-white text-sm mb-3">Контакты</h4>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2"><Icon name="Phone" size={13} className="text-green-500" /><span className="font-golos text-gray-400 text-xs">+7 (800) 555-00-00</span></div>
+            <div className="flex items-center gap-2"><Icon name="Mail" size={13} className="text-green-500" /><span className="font-golos text-gray-400 text-xs">zakaz@agrodron.ru</span></div>
+          </div>
+        </div>
+      </div>
+      <div className="border-t border-gray-700 pt-5 text-center">
+        <p className="font-golos text-gray-500 text-xs">© 2024 АгроДрон. Все права защищены.</p>
       </div>
     </div>
   </footer>
 );
 
+/* ───── PAGE ───── */
 export default function Index() {
   useReveal();
-
   return (
-    <div className="bg-agro-dark min-h-screen">
+    <div className="bg-white min-h-screen font-golos">
       <NavBar />
       <HeroSection />
-      <StatsSection />
       <AdvantagesSection />
       <DronesSection />
       <CapabilitiesSection />
-      <ProcessSection />
-      <WorksSection />
+      <OrderBanner />
       <AboutSection />
+      <CropsSection />
+      <WorksSection />
       <OrderSection />
       <Footer />
     </div>
