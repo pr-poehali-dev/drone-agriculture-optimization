@@ -45,7 +45,7 @@ const NavBar = () => {
           <div className="w-7 h-7 bg-green-500 rounded flex items-center justify-center">
             <Icon name="Plane" size={14} className="text-white rotate-45" />
           </div>
-          <span className="font-golos font-bold text-green-700 text-lg leading-none">АгроДрон</span>
+          <span className="font-golos font-bold text-green-700 text-lg leading-none">ВолгаДрон</span>
         </a>
 
         {/* Contacts */}
@@ -608,7 +608,7 @@ const Footer = () => (
             <div className="w-7 h-7 bg-green-500 rounded flex items-center justify-center">
               <Icon name="Plane" size={14} className="text-white rotate-45" />
             </div>
-            <span className="font-golos font-bold text-white text-lg">АгроДрон</span>
+            <span className="font-golos font-bold text-white text-lg">ВолгаДрон</span>
           </div>
           <p className="font-golos text-gray-400 text-xs leading-relaxed">Профессиональная обработка полей дронами по всей России</p>
         </div>
@@ -637,7 +637,7 @@ const Footer = () => (
         </div>
       </div>
       <div className="border-t border-gray-700 pt-5 text-center">
-        <p className="font-golos text-gray-500 text-xs">© 2024 АгроДрон. Все права защищены.</p>
+        <p className="font-golos text-gray-500 text-xs">© 2024 ВолгаДрон. Все права защищены.</p>
       </div>
     </div>
   </footer>
